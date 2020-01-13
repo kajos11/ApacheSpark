@@ -13,20 +13,30 @@ public class Main {
 
 	public static void main(String[] args) {
 		
-		List<Double> inputData = new ArrayList<>();
-		inputData.add(23.3);
-		inputData.add(236.34267);
-		inputData.add(81.55);
-		inputData.add(10.4);
+		List<Integer> inputData = new ArrayList<>();
+		inputData.add(35);
+		inputData.add(12);
+		inputData.add(90);
+		inputData.add(20);
 		
 		Logger.getLogger("org.apache").setLevel(Level.WARN);
 		
-		SparkConf conf = new SparkConf().setAppName("Starting Spark").setMaster("local[*]"); // local[*] -> run on all cores of local system
+		SparkConf conf = new SparkConf().setAppName("Starting Spark").setMaster("local[*]"); // local[*] -> run on all cores of local  
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		
-		JavaRDD<Double> myRdd = sc.parallelize(inputData);
+		JavaRDD<Integer> myRdd = sc.parallelize(inputData);
 		
+		Integer result = myRdd.reduce((value1, value2) -> value1 + value2);
 		
+		JavaRDD<Double> sqrtRdd = myRdd.map((value)->Math.sqrt(value));
+		
+		sqrtRdd.collect().forEach(System.out::println);
+		
+		System.out.println(result);
+		System.out.println(sqrtRdd.count());
+		// how many elements just using map and reduce
+		Integer sqrtRddCount = sqrtRdd.map((val)->1).reduce((val1,val2)-> val1+val2);
+		System.out.println("sqrtRddCount: "+sqrtRddCount);
 		
 		sc.close();
 		
