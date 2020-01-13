@@ -9,6 +9,8 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 
+import scala.Tuple2;
+
 public class Main {
 
 	public static void main(String[] args) {
@@ -24,19 +26,31 @@ public class Main {
 		SparkConf conf = new SparkConf().setAppName("Starting Spark").setMaster("local[*]"); // local[*] -> run on all cores of local  
 		JavaSparkContext sc = new JavaSparkContext(conf);
 		
-		JavaRDD<Integer> myRdd = sc.parallelize(inputData);
+		JavaRDD<Integer> originalIntegers = sc.parallelize(inputData);
+		//JavaRDD<Double> sqrtRdd = originalIntegers.map((value)->Math.sqrt(value));
 		
-		Integer result = myRdd.reduce((value1, value2) -> value1 + value2);
+		JavaRDD<IntegerWithSquareRoot> sqrtRdd = originalIntegers.map(value -> new IntegerWithSquareRoot(value));
 		
-		JavaRDD<Double> sqrtRdd = myRdd.map((value)->Math.sqrt(value));
+		//Tuple2<Integer,Double> myVal = new Tuple2<> (9,3.0);
 		
-		sqrtRdd.collect().forEach(System.out::println);
+		JavaRDD<Tuple2<Integer,Double>> sqrtRddTuple = originalIntegers.map(value -> new Tuple2<>(value,Math.sqrt(value)));
 		
-		System.out.println(result);
-		System.out.println(sqrtRdd.count());
-		// how many elements just using map and reduce
-		Integer sqrtRddCount = sqrtRdd.map((val)->1).reduce((val1,val2)-> val1+val2);
-		System.out.println("sqrtRddCount: "+sqrtRddCount);
+		sqrtRddTuple.collect().forEach(System.out::println);
+		
+		/*
+		 * JavaRDD<Integer> myRdd = sc.parallelize(inputData);
+		 * 
+		 * Integer result = myRdd.reduce((value1, value2) -> value1 + value2);
+		 * 
+		 * JavaRDD<Double> sqrtRdd = myRdd.map((value)->Math.sqrt(value));
+		 * 
+		 * sqrtRdd.collect().forEach(System.out::println);
+		 * 
+		 * System.out.println(result); System.out.println(sqrtRdd.count()); // how many
+		 * elements just using map and reduce Integer sqrtRddCount =
+		 * sqrtRdd.map((val)->1).reduce((val1,val2)-> val1+val2);
+		 * System.out.println("sqrtRddCount: "+sqrtRddCount);
+		 */
 		
 		sc.close();
 		
