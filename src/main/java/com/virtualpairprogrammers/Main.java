@@ -10,6 +10,8 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 
+import com.google.common.collect.Iterables;
+
 import scala.Tuple2;
 
 public class Main {
@@ -34,8 +36,14 @@ public class Main {
 		 .reduceByKey((value1, value2)->value1+value2)
 		 .foreach(tuple -> System.out.println(tuple._1+" has "+tuple._2+" instances"));
 		
+		//groupByKey- problematic in production clustered environment
 		
-	
+		sc.parallelize(inputData)
+		 .mapToPair((rawValue)->new Tuple2<>(rawValue.split(":")[0],1L))
+		 .groupByKey()//----------------------------------------------------------groupByKey- problematic in production clustered environment
+		 .foreach(tuple -> System.out.println(tuple._1+" has "+Iterables.size(tuple._2)+" instances"));
+		
+		
 		/*
 		 * //JavaRDD<Double> sqrtRdd = originalIntegers.map((value)->Math.sqrt(value));
 		 * 
